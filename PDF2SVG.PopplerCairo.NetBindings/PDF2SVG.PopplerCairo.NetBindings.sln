@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35527.113 d17.12
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PDF2SVG.PopplerCairo.Bindings", "PDF2SVG.PopplerCairo.Bindings\PDF2SVG.PopplerCairo.Bindings.csproj", "{82DDC606-4368-4CB3-8F97-C79B9F048E74}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PDF2SVG.PopplerCairo.Use", "PDF2SVG.PopplerCairo.Use\PDF2SVG.PopplerCairo.Use.csproj", "{8D885212-3AF1-493D-B4C5-A39BB552CBEB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{82DDC606-4368-4CB3-8F97-C79B9F048E74}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{82DDC606-4368-4CB3-8F97-C79B9F048E74}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{82DDC606-4368-4CB3-8F97-C79B9F048E74}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{82DDC606-4368-4CB3-8F97-C79B9F048E74}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8D885212-3AF1-493D-B4C5-A39BB552CBEB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8D885212-3AF1-493D-B4C5-A39BB552CBEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8D885212-3AF1-493D-B4C5-A39BB552CBEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8D885212-3AF1-493D-B4C5-A39BB552CBEB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
