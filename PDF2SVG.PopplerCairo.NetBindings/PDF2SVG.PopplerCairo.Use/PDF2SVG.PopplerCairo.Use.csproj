@@ -11,4 +11,10 @@
     <ProjectReference Include="..\PDF2SVG.PopplerCairo.Bindings\PDF2SVG.PopplerCairo.Bindings.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="input.pdf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

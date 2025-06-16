@@ -8,24 +8,24 @@ public static class Pdf2SvgInterop
 {
     static class NativeMethods
     {
-        [DllImport("pdf2svgwrapper.dll", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("native-svg2pdf\\pdf2svgwrapper", CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr pdf_open_doc(
             IntPtr pdfData,
             int pdfLen,
             out int pageCount
         );
 
-        [DllImport("pdf2svgwrapper.dll", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("native-svg2pdf\\pdf2svgwrapper", CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr pdf_get_page_svg(
             IntPtr docHandle,
             int pageNum,
             out int svgLen
         );
 
-        [DllImport("pdf2svgwrapper.dll", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("native-svg2pdf\\pdf2svgwrapper", CallingConvention = CallingConvention.Cdecl)]
         public static extern void pdf_close_doc(IntPtr docHandle);
 
-        [DllImport("pdf2svgwrapper.dll", CallingConvention = CallingConvention.Cdecl)]
+        [DllImport("native-svg2pdf\\pdf2svgwrapper", CallingConvention = CallingConvention.Cdecl)]
         public static extern void pdf_release_buffer(IntPtr ptr);
     }
 
