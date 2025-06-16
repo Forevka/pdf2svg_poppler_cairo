@@ -6,47 +6,131 @@ using System.Runtime.InteropServices;
 
 public static class Pdf2SvgInterop
 {
-    // Native conversion function
-    [DllImport("PDF2SVG.PopplerCairo", CallingConvention = CallingConvention.Cdecl)]
-    public static extern IntPtr pdf_page_to_svg_mem(
-        IntPtr pdfData,        // pointer to PDF bytes
-        int pdfLen,          // length of PDF in bytes
-        int pageNum,         // zero-based page index
-        out int svgLen        // output length of SVG buffer
-    );                                         
-
-    // CRT free() to release malloc'd buffer
-    [DllImport("msvcrt.dll", CallingConvention = CallingConvention.Cdecl)]
-    public static extern void free(IntPtr ptr);
-
-    /// <summary>
-    /// Converts the specified page of a PDF (provided as a MemoryStream) to an SVG MemoryStream.
-    /// </summary>
-    public static MemoryStream ConvertPdfPageToSvg(byte[] pdfBytes, int pageNum)
+    static class NativeMethods
     {
-        // Pin the array so the GC won't move it
-        GCHandle handle = GCHandle.Alloc(pdfBytes, GCHandleType.Pinned);
-        
+        [DllImport("pdf2svgwrapper.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr pdf_open_doc(
+            IntPtr pdfData,
+            int pdfLen,
+            out int pageCount
+        );
+
+        [DllImport("pdf2svgwrapper.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr pdf_get_page_svg(
+            IntPtr docHandle,
+            int pageNum,
+            out int svgLen
+        );
+
+        [DllImport("pdf2svgwrapper.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void pdf_close_doc(IntPtr docHandle);
+
+        [DllImport("pdf2svgwrapper.dll", CallingConvention = CallingConvention.Cdecl)]
+        public static extern void pdf_release_buffer(IntPtr ptr);
+    }
+
+    //// Native conversion function
+    //[DllImport("PDF2SVG.PopplerCairo", CallingConvention = CallingConvention.Cdecl)]
+    //public static extern IntPtr pdf_page_to_svg_mem(
+    //    IntPtr pdfData,        // pointer to PDF bytes
+    //    int pdfLen,          // length of PDF in bytes
+    //    int pageNum,         // zero-based page index
+    //    out int svgLen        // output length of SVG buffer
+    //);                                         
+
+    //// CRT free() to release malloc'd buffer
+    //[DllImport("msvcrt.dll", CallingConvention = CallingConvention.Cdecl)]
+    //public static extern void free(IntPtr ptr);
+
+    public static IEnumerable<MemoryStream> ConvertPdfToSvgs(byte[] pdfBytes)
+    {
+        // pin the managed array
+        var handle = GCHandle.Alloc(pdfBytes, GCHandleType.Pinned);
         try
         {
-            // Call the native function
-            IntPtr nativePtr = pdf_page_to_svg_mem(
+            IntPtr ptr = NativeMethods.pdf_open_doc(
                 handle.AddrOfPinnedObject(),
                 pdfBytes.Length,
-                pageNum,
-                out int svgLen);
+                out int pageCount
+            );
 
-            if (nativePtr == IntPtr.Zero)
-                throw new InvalidOperationException("PDF-to-SVG conversion failed.");
+            if (ptr == IntPtr.Zero)
+                throw new PopplerCairoConvertationException("Failed to open PDF.");
 
-            // Copy native buffer into managed byte[]
-            byte[] svgBytes = new byte[svgLen];
-            Marshal.Copy(nativePtr, svgBytes, 0, svgLen);
+            try
+            {
+                for (int i = 0; i < pageCount; i++)
+                {
+                    IntPtr svgBuf = NativeMethods.pdf_get_page_svg(ptr, i, out int svgLen);
+                    if (svgBuf == IntPtr.Zero)
+                        throw new PopplerCairoConvertationException($"Page {i} conversion failed.");
 
-            // free the native buffer
-            free(nativePtr);
+                    try
+                    {
+                        var svgBytes = new byte[svgLen];
+                        Marshal.Copy(svgBuf, svgBytes, 0, svgLen);
 
-            return new MemoryStream(svgBytes);
+                        yield return new MemoryStream(svgBytes, writable: false);
+                    }
+                    finally
+                    {
+                        NativeMethods.pdf_release_buffer(svgBuf);
+                    }
+                }
+            }
+            finally
+            {
+                NativeMethods.pdf_close_doc(ptr);
+            }
+        }
+        finally
+        {
+            handle.Free();
+        }
+    }
+
+
+    public static MemoryStream ConvertPdfPageToSvg(byte[] pdfBytes, int page)
+    {
+        // pin the managed array
+        var handle = GCHandle.Alloc(pdfBytes, GCHandleType.Pinned);
+        try
+        {
+            IntPtr ptr = NativeMethods.pdf_open_doc(
+                handle.AddrOfPinnedObject(),
+                pdfBytes.Length,
+                out _
+            );
+
+            if (ptr == IntPtr.Zero)
+                throw new PopplerCairoConvertationException("Failed to open PDF.");
+
+            try
+            {
+                IntPtr svgBuf = NativeMethods.pdf_get_page_svg(ptr, page, out int svgLen);
+                if (svgBuf == IntPtr.Zero)
+                    throw new PopplerCairoConvertationException($"Page {page} conversion failed.");
+
+                try
+                {
+                    var svgBytes = new byte[svgLen];
+                    Marshal.Copy(svgBuf, svgBytes, 0, svgLen);
+
+                    return new MemoryStream(svgBytes, writable: false);
+                }
+                finally
+                {
+                    NativeMethods.pdf_release_buffer(svgBuf);
+                }
+            }
+            finally
+            {
+                NativeMethods.pdf_close_doc(ptr);
+            }
+        }
+        catch (Exception e)
+        {
+            throw new PopplerCairoConvertationException("Failed to convert PDF to SVG", e);
         }
         finally
         {
