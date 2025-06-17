@@ -1,4 +1,5 @@
 ﻿using PDF2SVG.PopplerCairo.Bindings;
+using System;
 
 namespace PDF2SVG.PopplerCairo.Use
 {
@@ -7,16 +8,29 @@ namespace PDF2SVG.PopplerCairo.Use
         static void Main()
         {
             // Read PDF into managed byte[]
-            byte[] pdfBytes = File.ReadAllBytes("./input.pdf");
+            byte[] pdfBytes = File.ReadAllBytes("./input-2.pdf");
 
 
-            var svg = Pdf2SvgInterop.ConvertPdfPageToSvg(pdfBytes, 0);
+            var pageData = Pdf2SvgInterop.ConvertPdfPages(pdfBytes);
             // Unpin the PDF buffer
 
             // Wrap in MemoryStream or write out
-            File.WriteAllBytes("./output.svg", svg.ToArray());
+            var index = 0;
+            foreach (var pdfPageData in pageData)
+            {
+                if (pdfPageData.IsSvg)
+                    File.WriteAllBytes($"./output-{index}.svg", pdfPageData.Data.ToArray());
+                else
+                {
+                    File.WriteAllBytes($"./output-{index}.png", pdfPageData.Data.ToArray());
+                }
 
-            Console.WriteLine("SVG written to output.svg");
+                Console.WriteLine($"Pdf page {index} processed");
+                index++;
+            }
+            
+
+            Console.WriteLine("Pdf processed");
         }
     }
 }

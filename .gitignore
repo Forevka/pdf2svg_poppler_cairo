@@ -1,7 +1,7 @@
 # Created by https://www.toptal.com/developers/gitignore/api/c++,csharp,visualstudio
 # Edit at https://www.toptal.com/developers/gitignore?templates=c++,csharp,visualstudio
 
-
+input-2.pdf
 ### C++ ###
 # Prerequisites
 *.d

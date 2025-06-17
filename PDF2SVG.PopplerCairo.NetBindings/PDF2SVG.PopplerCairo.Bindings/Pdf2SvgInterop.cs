@@ -4,6 +4,12 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 
+public class PdfPageData
+{
+    public required bool IsSvg { get; set; }
+    public required MemoryStream Data { get; set; }
+}
+
 public static class Pdf2SvgInterop
 {
     static class NativeMethods
@@ -16,10 +22,11 @@ public static class Pdf2SvgInterop
         );
 
         [DllImport("native-svg2pdf/pdf2svgwrapper", CallingConvention = CallingConvention.Cdecl)]
-        public static extern IntPtr pdf_get_page_svg(
+        public static extern IntPtr pdf_get_page_data(
             IntPtr docHandle,
             int pageNum,
-            out int svgLen
+            out int dataLen,
+            out bool isSvg
         );
 
         [DllImport("native-svg2pdf/pdf2svgwrapper", CallingConvention = CallingConvention.Cdecl)]
@@ -42,7 +49,7 @@ public static class Pdf2SvgInterop
     //[DllImport("msvcrt.dll", CallingConvention = CallingConvention.Cdecl)]
     //public static extern void free(IntPtr ptr);
 
-    public static IEnumerable<MemoryStream> ConvertPdfToSvgs(byte[] pdfBytes)
+    public static IEnumerable<PdfPageData> ConvertPdfPages(byte[] pdfBytes)
     {
         // pin the managed array
         var handle = GCHandle.Alloc(pdfBytes, GCHandleType.Pinned);
@@ -61,20 +68,24 @@ public static class Pdf2SvgInterop
             {
                 for (int i = 0; i < pageCount; i++)
                 {
-                    IntPtr svgBuf = NativeMethods.pdf_get_page_svg(ptr, i, out int svgLen);
-                    if (svgBuf == IntPtr.Zero)
+                    IntPtr dataBuf = NativeMethods.pdf_get_page_data(ptr, i, out int dataLen, out var isSvg);
+                    if (dataBuf == IntPtr.Zero)
                         throw new PopplerCairoConvertationException($"Page {i} conversion failed.");
 
                     try
                     {
-                        var svgBytes = new byte[svgLen];
-                        Marshal.Copy(svgBuf, svgBytes, 0, svgLen);
+                        var dataBytes = new byte[dataLen];
+                        Marshal.Copy(dataBuf, dataBytes, 0, dataLen);
 
-                        yield return new MemoryStream(svgBytes, writable: false);
+                        yield return new PdfPageData
+                        {
+                            Data = new MemoryStream(dataBytes, writable: false),
+                            IsSvg = isSvg,
+                        };
                     }
                     finally
                     {
-                        NativeMethods.pdf_release_buffer(svgBuf);
+                        NativeMethods.pdf_release_buffer(dataBuf);
                     }
                 }
             }
@@ -90,7 +101,7 @@ public static class Pdf2SvgInterop
     }
 
 
-    public static MemoryStream ConvertPdfPageToSvg(byte[] pdfBytes, int page)
+    public static PdfPageData ConvertPdfPage(byte[] pdfBytes, int page)
     {
         // pin the managed array
         var handle = GCHandle.Alloc(pdfBytes, GCHandleType.Pinned);
@@ -107,20 +118,24 @@ public static class Pdf2SvgInterop
 
             try
             {
-                IntPtr svgBuf = NativeMethods.pdf_get_page_svg(ptr, page, out int svgLen);
-                if (svgBuf == IntPtr.Zero)
+                IntPtr dataBuf = NativeMethods.pdf_get_page_data(ptr, page, out var dataLen, out var isSvg);
+                if (dataBuf == IntPtr.Zero)
                     throw new PopplerCairoConvertationException($"Page {page} conversion failed.");
 
                 try
                 {
-                    var svgBytes = new byte[svgLen];
-                    Marshal.Copy(svgBuf, svgBytes, 0, svgLen);
+                    var svgBytes = new byte[dataLen];
+                    Marshal.Copy(dataBuf, svgBytes, 0, dataLen);
 
-                    return new MemoryStream(svgBytes, writable: false);
+                    return new PdfPageData
+                    {
+                        Data = new MemoryStream(svgBytes, writable: false),
+                        IsSvg = isSvg,
+                    };
                 }
                 finally
                 {
-                    NativeMethods.pdf_release_buffer(svgBuf);
+                    NativeMethods.pdf_release_buffer(dataBuf);
                 }
             }
             finally

@@ -12,6 +12,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="input-2.pdf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="input.pdf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
