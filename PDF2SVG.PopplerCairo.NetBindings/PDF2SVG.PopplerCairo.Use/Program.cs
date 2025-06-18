@@ -11,7 +11,7 @@ namespace PDF2SVG.PopplerCairo.Use
             byte[] pdfBytes = File.ReadAllBytes("./input-2.pdf");
 
 
-            var pageData = Pdf2SvgInterop.ConvertPdfPages(pdfBytes);
+            var pageData = Pdf2SvgInterop.ConvertPdfPages(pdfBytes, true);
             // Unpin the PDF buffer
 
             // Wrap in MemoryStream or write out

@@ -25,6 +25,8 @@ public static class Pdf2SvgInterop
         public static extern IntPtr pdf_get_page_data(
             IntPtr docHandle,
             int pageNum,
+            bool isForcePng,
+            int dpi,
             out int dataLen,
             out bool isSvg
         );
@@ -49,7 +51,7 @@ public static class Pdf2SvgInterop
     //[DllImport("msvcrt.dll", CallingConvention = CallingConvention.Cdecl)]
     //public static extern void free(IntPtr ptr);
 
-    public static IEnumerable<PdfPageData> ConvertPdfPages(byte[] pdfBytes)
+    public static IEnumerable<PdfPageData> ConvertPdfPages(byte[] pdfBytes, bool isForceToPng, int dpi = 300)
     {
         // pin the managed array
         var handle = GCHandle.Alloc(pdfBytes, GCHandleType.Pinned);
@@ -68,7 +70,7 @@ public static class Pdf2SvgInterop
             {
                 for (int i = 0; i < pageCount; i++)
                 {
-                    IntPtr dataBuf = NativeMethods.pdf_get_page_data(ptr, i, out int dataLen, out var isSvg);
+                    IntPtr dataBuf = NativeMethods.pdf_get_page_data(ptr, i, isForceToPng, dpi, out int dataLen, out var isSvg);
                     if (dataBuf == IntPtr.Zero)
                         throw new PopplerCairoConvertationException($"Page {i} conversion failed.");
 
@@ -101,7 +103,7 @@ public static class Pdf2SvgInterop
     }
 
 
-    public static PdfPageData ConvertPdfPage(byte[] pdfBytes, int page)
+    public static PdfPageData ConvertPdfPage(byte[] pdfBytes, int page, bool isForceToPng, int dpi = 300)
     {
         // pin the managed array
         var handle = GCHandle.Alloc(pdfBytes, GCHandleType.Pinned);
@@ -118,7 +120,7 @@ public static class Pdf2SvgInterop
 
             try
             {
-                IntPtr dataBuf = NativeMethods.pdf_get_page_data(ptr, page, out var dataLen, out var isSvg);
+                IntPtr dataBuf = NativeMethods.pdf_get_page_data(ptr, page, isForceToPng, dpi, out var dataLen, out var isSvg);
                 if (dataBuf == IntPtr.Zero)
                     throw new PopplerCairoConvertationException($"Page {page} conversion failed.");
 
