@@ -7,6 +7,12 @@
 
 
 		<RuntimeIdentifiers>win-x64;linux-x64</RuntimeIdentifiers>
+		
+		<PackageId>PDF2SVG.PopplerCairo.Bindings</PackageId>
+		<Version>1.0.0</Version>
+		<Authors>Forevka</Authors>
+		<Description>Bindings for converting PDF pages to SVG/PNG using Poppler and Cairo.</Description>
+		
 	</PropertyGroup>
 
 	<ItemGroup>
