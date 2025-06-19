@@ -4,7 +4,7 @@ This repository contains a minimal set of .NET bindings that expose a native `pd
 
 The native libraries for both **Windows x64** and **Linux x64** are included under `PDF2SVG.PopplerCairo.Bindings`. They are packaged as part of the `PDF2SVG.PopplerCairo.Bindings` project so that the native code is copied to the output directory when building.
 
-A small console project (`PDF2SVG.PopplerCairo.Use`) demonstrates how to invoke the binding. It reads `input.pdf` and writes the first page to `output.svg`.
+A small console project (`PDF2SVG.PopplerCairo.Use`) demonstrates how to invoke the binding. It reads `input.pdf` and iterates through its pages writing them to `output-{index}.svg` or `output-{index}.png` when the result is not SVG.
 
 ## Building
 
@@ -23,7 +23,7 @@ The sample console program shows basic usage:
 ```csharp
 byte[] pdfBytes = File.ReadAllBytes("./input-2.pdf");
 
-var pageData = Pdf2SvgInterop.ConvertPdfPages(pdfBytes);
+var pageData = Pdf2SvgInterop.ConvertPdfPages(pdfBytes, true); // optional dpi can be provided
 
 var index = 0;
 foreach (var pdfPageData in pageData)
@@ -43,13 +43,15 @@ foreach (var pdfPageData in pageData)
 Console.WriteLine("Pdf processed");
 ```
 
+`ConvertPdfPages` accepts the PDF bytes and a flag forcing rasterized PNG output for pages that cannot be represented as SVG. The third argument allows overriding the default DPI. To convert a single page there is also `ConvertPdfPage`.
+
 Run it with:
 
 ```bash
 dotnet run --project PDF2SVG.PopplerCairo.NetBindings/PDF2SVG.PopplerCairo.Use
 ```
 
-This will read `input.pdf` from the project directory and generate `output.svg`.
+This will read `input.pdf` from the project directory and create `output-{index}.svg` or `output-{index}.png` for each page.
 
 ## Notes
 
