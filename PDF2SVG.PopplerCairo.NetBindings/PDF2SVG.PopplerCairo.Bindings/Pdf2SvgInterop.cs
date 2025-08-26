@@ -12,7 +12,7 @@ public class PdfPageData
 
 public static class Pdf2SvgInterop
 {
-    static class NativeMethods
+    internal static class NativeMethods
     {
         [DllImport("native-svg2pdf/pdf2svgwrapper", CallingConvention = CallingConvention.Cdecl)]
         public static extern IntPtr pdf_open_doc(
@@ -60,7 +60,7 @@ public static class Pdf2SvgInterop
             IntPtr ptr = NativeMethods.pdf_open_doc(
                 handle.AddrOfPinnedObject(),
                 pdfBytes.Length,
-                out int pageCount
+                out var pageCount
             );
 
             if (ptr == IntPtr.Zero)
