@@ -8,8 +8,7 @@ namespace PDF2SVG.PopplerCairo.Use
         static void Main()
         {
             // Read PDF into managed byte[]
-            byte[] pdfBytes = File.ReadAllBytes("./input-2.pdf");
-
+            byte[] pdfBytes = File.ReadAllBytes("./input.pdf");
 
             var pageData = Pdf2SvgInterop.ConvertPdfPages(pdfBytes, true);
             // Unpin the PDF buffer
@@ -25,12 +24,33 @@ namespace PDF2SVG.PopplerCairo.Use
                     File.WriteAllBytes($"./output-{index}.png", pdfPageData.Data.ToArray());
                 }
 
-                Console.WriteLine($"Pdf page {index} processed");
+                Console.WriteLine($"[No enumerable] Pdf page {index} processed");
                 index++;
             }
             
 
-            Console.WriteLine("Pdf processed");
+            Console.WriteLine("Pdf processed without enumerable");
+
+
+
+            using (var pages = PdfPageEnumerable.ConvertPdfPages(pdfBytes, true))
+            {
+                Console.WriteLine($"PageCount = {pages.PageCount}");
+
+                foreach (var page in pages)
+                {
+                    if (page.IsSvg)
+                        File.WriteAllBytes($"./output-enumerable-{index}.svg", page.Data.ToArray());
+                    else
+                    {
+                        File.WriteAllBytes($"./output-enumerable-{index}.png", page.Data.ToArray());
+                    }
+
+                    Console.WriteLine($"[Enumerable] Pdf page {index} processed");
+                }
+            }
+
+            Console.WriteLine("Pdf processed with enumerable");
         }
     }
 }
