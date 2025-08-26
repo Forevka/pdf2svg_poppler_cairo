@@ -32,7 +32,7 @@ namespace PDF2SVG.PopplerCairo.Use
             Console.WriteLine("Pdf processed without enumerable");
 
 
-
+            index = 0;
             using (var pages = PdfPageEnumerable.ConvertPdfPages(pdfBytes, true))
             {
                 Console.WriteLine($"PageCount = {pages.PageCount}");
@@ -47,6 +47,7 @@ namespace PDF2SVG.PopplerCairo.Use
                     }
 
                     Console.WriteLine($"[Enumerable] Pdf page {index} processed");
+                    index++;
                 }
             }
 
