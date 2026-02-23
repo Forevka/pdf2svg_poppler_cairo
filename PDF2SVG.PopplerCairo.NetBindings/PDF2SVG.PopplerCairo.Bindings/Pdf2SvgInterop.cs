@@ -1,4 +1,4 @@
-﻿namespace PDF2SVG.PopplerCairo.Bindings;
+namespace PDF2SVG.PopplerCairo.Bindings;
 
 using System;
 using System.IO;
@@ -25,10 +25,10 @@ public static class Pdf2SvgInterop
         public static extern IntPtr pdf_get_page_data(
             IntPtr docHandle,
             int pageNum,
-            bool isForcePng,
+            [MarshalAs(UnmanagedType.I1)] bool isForcePng,
             int dpi,
             out int dataLen,
-            out bool isSvg
+            [MarshalAs(UnmanagedType.I1)] out bool isSvg
         );
 
         [DllImport("native-svg2pdf/pdf2svgwrapper", CallingConvention = CallingConvention.Cdecl)]

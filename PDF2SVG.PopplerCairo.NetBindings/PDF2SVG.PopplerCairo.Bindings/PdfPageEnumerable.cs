@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Runtime.InteropServices;
 
 namespace PDF2SVG.PopplerCairo.Bindings;
@@ -68,10 +68,11 @@ public sealed class PdfPageEnumerable : IEnumerable<PdfPageData>, IDisposable
 
     public void Dispose()
     {
-        if (IsDocumentOpened || _docPtr == IntPtr.Zero)
+        if (IsDocumentOpened && _docPtr != IntPtr.Zero)
         {
             Pdf2SvgInterop.NativeMethods.pdf_close_doc(_docPtr);
             _docPtr = IntPtr.Zero;
+            IsDocumentOpened = false;
         }
 
         if (_handle.HasValue)
